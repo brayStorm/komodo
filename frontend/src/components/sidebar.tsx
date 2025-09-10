@@ -36,6 +36,13 @@ export const Sidebar = () => {
           highlighted={view === "Resources"}
         />
         <SidebarLink
+          label="Overview"
+          to="/"
+          icon={<Boxes className="w-4 h-4" />}
+          onClick={() => setView("Overview")}
+          highlighted={view === "Overview"}
+        />
+        <SidebarLink
           label="Containers"
           to="/containers"
           icon={<Box className="w-4 h-4" />}

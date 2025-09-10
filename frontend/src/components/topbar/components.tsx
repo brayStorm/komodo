@@ -77,12 +77,14 @@ export const MobileDropdown = () => {
       ? [<LayoutDashboard className="w-4 h-4" />, "Dashboard"]
       : location.pathname === "/" && view === "Resources"
         ? [<Boxes className="w-4 h-4" />, "Resources"]
-        : location.pathname === "/" && view === "Tree"
-          ? [<FolderTree className="w-4 h-4" />, "Tree"]
-          : location.pathname === "/containers"
-            ? [<Box className="w-4 h-4" />, "Containers"]
-            : location.pathname === "/settings"
-              ? [<Settings className="w-4 h-4" />, "Settings"]
+        : location.pathname === "/" && view === "Overview"
+          ? [<Boxes className="w-4 h-4" />, "Overview"]
+          : location.pathname === "/" && view === "Tree"
+            ? [<FolderTree className="w-4 h-4" />, "Tree"]
+            : location.pathname === "/containers"
+              ? [<Box className="w-4 h-4" />, "Containers"]
+              : location.pathname === "/settings"
+                ? [<Settings className="w-4 h-4" />, "Settings"]
               : location.pathname === "/schedules"
                 ? [<CalendarDays className="w-4 h-4" />, "Schedules"]
                 : location.pathname === "/alerts"
@@ -119,6 +121,12 @@ export const MobileDropdown = () => {
             icon={<Boxes className="w-4 h-4" />}
             to="/"
             onClick={() => setView("Resources")}
+          />
+          <DropdownLinkItem
+            label="Overview"
+            icon={<Boxes className="w-4 h-4" />}
+            to="/"
+            onClick={() => setView("Overview")}
           />
           <DropdownLinkItem
             label="Containers"

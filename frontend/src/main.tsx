@@ -18,7 +18,7 @@ const query_client = new QueryClient({
   defaultOptions: { queries: { retry: false } },
 });
 
-export type HomeView = "Dashboard" | "Tree" | "Resources";
+export type HomeView = "Dashboard" | "Tree" | "Resources" | "Overview";
 
 export const homeViewAtom = atomWithStorage<HomeView>(
   "home-view-v1",

@@ -6,6 +6,7 @@ import { lazy } from "react";
 const Dashboard = lazy(() => import("./dashboard"));
 const AllResources = lazy(() => import("./all_resources"));
 const Tree = lazy(() => import("./tree"));
+const Overview = lazy(() => import("./overview"));
 
 export default function Home() {
   useSetTitle();
@@ -17,5 +18,7 @@ export default function Home() {
       return <AllResources />;
     case "Tree":
       return <Tree />;
+    case "Overview":
+      return <Overview />;
   }
 }
