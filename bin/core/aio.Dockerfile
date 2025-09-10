@@ -27,8 +27,14 @@ RUN cd frontend && yarn link komodo_client && yarn && yarn build
 FROM debian:bullseye-slim
 
 COPY ./bin/core/starship.toml /starship.toml
-COPY ./bin/core/debian-deps.sh .
-RUN sh ./debian-deps.sh && rm ./debian-deps.sh
+
+# Install dependencies directly
+RUN apt-get update && \
+    apt-get install -y git curl ca-certificates iproute2 && \
+    rm -rf /var/lib/apt/lists/* && \
+    curl -sS https://starship.rs/install.sh | sh -s -- --yes --bin-dir /usr/local/bin && \
+    echo 'export STARSHIP_CONFIG=/starship.toml' >> /root/.bashrc && \
+    echo 'eval "$(starship init bash)"' >> /root/.bashrc
 
 # Setup an application directory
 WORKDIR /app
