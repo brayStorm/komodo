@@ -22,7 +22,7 @@ import {
   Layers2,
   Server,
 } from "lucide-react";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Overview() {
@@ -113,11 +113,11 @@ const ServerRow = ({
   toggleStack,
   search,
 }: {
-  server: Types.ResourceListItem<unknown>;
+  server: any;
   isExpanded: boolean;
   onToggle: () => void;
-  stacks?: Types.StackListItem[];
-  deployments?: Types.DeploymentListItem[];
+  stacks?: any[];
+  deployments?: any[];
   expandedStacks: Set<string>;
   toggleStack: (stackId: string) => void;
   search: string;
@@ -194,7 +194,7 @@ const StackRow = ({
   onToggle,
   search,
 }: {
-  stack: Types.StackListItem;
+  stack: any;
   isExpanded: boolean;
   onToggle: () => void;
   search: string;
@@ -267,7 +267,7 @@ const StackRow = ({
 const DeploymentRow = ({
   deployment,
 }: {
-  deployment: Types.DeploymentListItem;
+  deployment: any;
 }) => {
   const color = stroke_color_class_by_intention(
     deployment_state_intention(deployment.info.state)
@@ -304,7 +304,7 @@ const ServiceRow = ({
   service,
   stackId,
 }: {
-  service: Types.StackService;
+  service: any;
   stackId: string;
 }) => {
   const color = stroke_color_class_by_intention(
