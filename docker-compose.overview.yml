@@ -1,0 +1,60 @@
+services:
+  komodo_core:
+    build:
+      context: .
+      dockerfile: bin/core/aio.Dockerfile
+    restart: unless-stopped
+    logging:
+      driver: local
+    networks:
+      - default
+    ports:
+      - "9120:9120"
+    environment:
+      KOMODO_FIRST_SERVER: https://komodo_periphery:8120
+      KOMODO_DATABASE_ADDRESS: ferretdb
+      KOMODO_ENABLE_NEW_USERS: true
+      KOMODO_LOCAL_AUTH: true
+      KOMODO_JWT_SECRET: a_random_secret
+    volumes:
+      - repo-cache:/repo-cache
+    depends_on:
+      - ferretdb
+
+  komodo_periphery:
+    build:
+      context: .
+      dockerfile: bin/periphery/aio.Dockerfile
+    restart: unless-stopped
+    logging:
+      driver: local
+    networks:
+      - default
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /proc:/proc
+      - repos:/etc/komodo/repos
+      - stacks:/etc/komodo/stacks
+    environment:
+      PERIPHERY_INCLUDE_DISK_MOUNTS: /etc/hostname
+
+  ferretdb:
+    image: ghcr.io/ferretdb/ferretdb:1
+    restart: unless-stopped
+    logging:
+      driver: local
+    networks:
+      - default
+    environment:
+      - FERRETDB_HANDLER=sqlite
+    volumes:
+      - data:/state
+
+networks:
+  default: {}
+
+volumes:
+  data:
+  repo-cache:
+  repos:
+  stacks:

@@ -20,8 +20,18 @@ FROM node:20.12-alpine AS frontend-builder
 WORKDIR /builder
 COPY ./frontend ./frontend
 COPY ./client/core/ts ./client
-RUN cd client && yarn && yarn build && yarn link
-RUN cd frontend && yarn link komodo_client && yarn && yarn build
+
+# Build client first with error checking
+RUN cd client && \
+    yarn install --frozen-lockfile && \
+    yarn build && \
+    yarn link
+
+# Build frontend with better error output
+RUN cd frontend && \
+    yarn link komodo_client && \
+    yarn install --frozen-lockfile && \
+    yarn build
 
 # Final Image
 FROM debian:bullseye-slim
