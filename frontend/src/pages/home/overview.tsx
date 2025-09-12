@@ -13,7 +13,6 @@ import { cn } from "@lib/utils";
 import { Button } from "@ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/card";
 import { Input } from "@ui/input";
-import { Types } from "komodo_client";
 import {
   ChevronDown,
   ChevronRight,
