@@ -21,6 +21,7 @@ import {
   Layers,
   Layers2,
   Server,
+  Box,
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -31,6 +32,9 @@ export default function Overview() {
     new Set()
   );
   const [expandedStacks, setExpandedStacks] = useState<Set<string>>(
+    new Set()
+  );
+  const [expandedServices, setExpandedServices] = useState<Set<string>>(
     new Set()
   );
 
@@ -58,6 +62,18 @@ export default function Overview() {
         newSet.delete(stackId);
       } else {
         newSet.add(stackId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleService = (serviceId: string) => {
+    setExpandedServices((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(serviceId)) {
+        newSet.delete(serviceId);
+      } else {
+        newSet.add(serviceId);
       }
       return newSet;
     });
@@ -93,6 +109,8 @@ export default function Overview() {
                 deployments={deployments}
                 expandedStacks={expandedStacks}
                 toggleStack={toggleStack}
+                expandedServices={expandedServices}
+                toggleService={toggleService}
                 search={search}
               />
             </div>
@@ -111,6 +129,8 @@ const ServerRow = ({
   deployments,
   expandedStacks,
   toggleStack,
+  expandedServices,
+  toggleService,
   search,
 }: {
   server: any;
@@ -120,6 +140,8 @@ const ServerRow = ({
   deployments?: any[];
   expandedStacks: Set<string>;
   toggleStack: (stackId: string) => void;
+  expandedServices: Set<string>;
+  toggleService: (serviceId: string) => void;
   search: string;
 }) => {
   const serverStacks = stacks?.filter(
@@ -160,7 +182,7 @@ const ServerRow = ({
               <Link to={`/servers/${server.id}`} onClick={(e) => e.stopPropagation()}>
                 <Button variant="outline" size="sm">
                   <ResourceComponents.Server.Icon id={server.id} />
-                  View
+                  <span className="ml-2">View</span>
                 </Button>
               </Link>
             </div>
@@ -176,6 +198,8 @@ const ServerRow = ({
               stack={stack}
               isExpanded={expandedStacks.has(stack.id)}
               onToggle={() => toggleStack(stack.id)}
+              expandedServices={expandedServices}
+              toggleService={toggleService}
               search={search}
             />
           ))}
@@ -192,11 +216,15 @@ const StackRow = ({
   stack,
   isExpanded,
   onToggle,
+  expandedServices,
+  toggleService,
   search,
 }: {
   stack: any;
   isExpanded: boolean;
   onToggle: () => void;
+  expandedServices: Set<string>;
+  toggleService: (serviceId: string) => void;
   search: string;
 }) => {
   const services = useRead(
@@ -256,7 +284,13 @@ const StackRow = ({
       {isExpanded && hasServices && (
         <div className="ml-6 grid gap-1">
           {filteredServices?.map((service) => (
-            <ServiceRow key={service.service} service={service} stackId={stack.id} />
+            <ServiceRow 
+              key={service.service} 
+              service={service} 
+              stackId={stack.id}
+              isExpanded={expandedServices.has(`${stack.id}-${service.service}`)}
+              onToggle={() => toggleService(`${stack.id}-${service.service}`)}
+            />
           ))}
         </div>
       )}
@@ -303,37 +337,108 @@ const DeploymentRow = ({
 const ServiceRow = ({
   service,
   stackId,
+  isExpanded,
+  onToggle,
 }: {
   service: any;
   stackId: string;
+  isExpanded: boolean;
+  onToggle: () => void;
 }) => {
   const color = stroke_color_class_by_intention(
     container_state_intention(service.container?.state)
   );
 
+  const hasContainer = service.container;
+
   return (
-    <Card className="hover:bg-accent/10 transition-colors">
+    <>
+      <Card className="hover:bg-accent/10 transition-colors">
+        <CardContent className="p-2">
+          <div 
+            className="flex justify-between items-center cursor-pointer"
+            onClick={hasContainer ? onToggle : undefined}
+          >
+            <div className="flex items-center gap-2">
+              {hasContainer &&
+                (isExpanded ? (
+                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                ) : (
+                  <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                ))}
+              {!hasContainer && <div className="w-3" />}
+              <Layers2 className={cn("w-3 h-3", color)} />
+              <span className="text-sm">{service.service}</span>
+              {service.container && (
+                <StatusBadge
+                  text={service.container.state}
+                  intent={container_state_intention(service.container.state)}
+                />
+              )}
+            </div>
+            <Link
+              to={`/stacks/${stackId}/service/${service.service}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Button variant="ghost" size="sm">
+                View
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      {isExpanded && hasContainer && (
+        <div className="ml-6">
+          <ContainerRow container={service.container} />
+        </div>
+      )}
+    </>
+  );
+};
+
+const ContainerRow = ({
+  container,
+}: {
+  container: any;
+}) => {
+  const color = stroke_color_class_by_intention(
+    container_state_intention(container.state)
+  );
+
+  return (
+    <Card className="hover:bg-accent/5 transition-colors">
       <CardContent className="p-2">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="w-4" />
-            <Layers2 className={cn("w-3 h-3", color)} />
-            <span className="text-sm">{service.service}</span>
-            {service.container && (
-              <StatusBadge
-                text={service.container.state}
-                intent={container_state_intention(service.container.state)}
-              />
+            <div className="w-3" />
+            <Box className={cn("w-3 h-3", color)} />
+            <span className="text-xs font-mono">{container.name}</span>
+            <StatusBadge
+              text={container.state}
+              intent={container_state_intention(container.state)}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            {container.network?.ports && container.network.ports.length > 0 && (
+              <div className="flex gap-1">
+                {container.network.ports.slice(0, 3).map((port: any, index: number) => (
+                  <span
+                    key={index}
+                    className="text-xs bg-muted px-2 py-1 rounded font-mono"
+                  >
+                    {port.host_port ? `${port.host_port}:` : ''}{port.container_port}
+                    {port.protocol !== 'tcp' ? `/${port.protocol}` : ''}
+                  </span>
+                ))}
+                {container.network.ports.length > 3 && (
+                  <span className="text-xs text-muted-foreground">
+                    +{container.network.ports.length - 3} more
+                  </span>
+                )}
+              </div>
             )}
           </div>
-          <Link
-            to={`/stacks/${stackId}/service/${service.service}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Button variant="ghost" size="sm">
-              View
-            </Button>
-          </Link>
         </div>
       </CardContent>
     </Card>
